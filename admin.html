@@ -17,9 +17,9 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 40px 20px; line-height: 1.6; }
         .container { max-width: 1000px; margin: 0 auto; background: #fff; border: 1px solid var(--line-color); padding: 40px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--line-color); padding-bottom: 15px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--line-color); padding-bottom: 15px; flex-wrap: wrap; gap: 15px; }
         .admin-header h2 { font-size: 1.5rem; font-weight: 400; }
-        .admin-actions-bar { display: flex; gap: 10px; }
+        .admin-actions-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .btn-primary, .btn-secondary, .btn-danger { border: none; padding: 8px 16px; font-size: 0.85rem; cursor: pointer; letter-spacing: 1px; border-radius: 4px; transition: background 0.3s; }
         .btn-primary { background: var(--text-main); color: #fff; }
         .btn-primary:hover { background: var(--accent); }
@@ -37,23 +37,64 @@
         .admin-form-group label { display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
         .admin-form-group input, .admin-form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--line-color); background: #fff; font-size: 0.95rem; color: var(--text-main); border-radius: 4px; }
         .admin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* 登入遮罩樣式 */
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(247, 245, 240, 0.98);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
+            display: none; /* 預設隱藏，由程式判斷 */
+        }
+        .login-card {
+            background: #ffffff; border: 1px solid var(--line-color);
+            padding: 40px; border-radius: 8px; width: 100%; max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .login-card h2 { font-size: 1.4rem; font-weight: 400; text-align: center; color: var(--accent); }
+        .login-error { color: #c55a5a; font-size: 0.85rem; text-align: center; display: none; }
     </style>
 </head>
 <body>
+
+    <!-- 登入驗證畫面 -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <h2>管理員身分驗證</h2>
+            <div class="admin-form-group">
+                <label>管理員 Email</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com">
+            </div>
+            <div class="admin-form-group">
+                <label>密碼</label>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+            <div id="loginError" class="login-error">帳號或密碼錯誤</div>
+            <button class="btn-primary" style="width: 100%; padding: 12px;" onclick="handleLogin()">登入管理後台</button>
+        </div>
+    </div>
+
+    <!-- 後台主容器 -->
     <div class="container">
         <div class="admin-header">
-            <h2>作品集內容與圖片管理後台 (CMS - 雲端同步版)</h2>
+            <div>
+                <h2>作品集內容與圖片管理後台</h2>
+                <span id="userEmailTag" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+            </div>
             <div class="admin-actions-bar">
                 <button class="btn-primary" onclick="addNewProject()">＋ 新增專案</button>
                 <button class="btn-secondary" onclick="resetToDefaultData()">恢復預設值</button>
                 <button class="btn-primary" onclick="saveData()">儲存並同步至雲端</button>
+                <button class="btn-secondary" onclick="handleLogout()" style="border-color: #c55a5a; color: #c55a5a;">登出</button>
             </div>
         </div>
         <div id="adminContainer">載入雲端資料中...</div>
     </div>
 
     <script>
-        // Supabase 設定
+        // Supabase 設定 (已換成您的傳統 anon 長金鑰)
         const SUPABASE_URL = 'https://dkjgzvztsnbnwaqxukih.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRramd6dnp0c25ibndhcXh1a2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5ODEyNzEsImV4cCI6MjEwNzU1NzI3MX0.IpNbg-PkLyNhiJa2pprDh5BY0ryiPaZ5MkAihrZxcig';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -109,6 +150,42 @@
         let aboutData = JSON.parse(JSON.stringify(defaultAboutData));
         let projectsData = JSON.parse(JSON.stringify(defaultProjectsData));
 
+        // 檢查登入狀態
+        async function checkUserSession() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('userEmailTag').innerText = `已登入: ${session.user.email}`;
+                loadDataFromCloud();
+            } else {
+                document.getElementById('loginOverlay').style.display = 'flex';
+            }
+        }
+
+        // 執行登入
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorMsg = document.getElementById('loginError');
+            errorMsg.style.display = 'none';
+
+            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                errorMsg.innerText = '登入失敗：' + error.message;
+                errorMsg.style.display = 'block';
+            } else {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('userEmailTag').innerText = `已登入: ${data.user.email}`;
+                loadDataFromCloud();
+            }
+        }
+
+        // 執行登出
+        async function handleLogout() {
+            await _supabase.auth.signOut();
+            location.reload();
+        }
+
         // 從雲端載入資料
         async function loadDataFromCloud() {
             try {
@@ -133,7 +210,6 @@
 
         async function saveKeyToCloud(key, valueObj) {
             const valueStr = JSON.stringify(valueObj);
-            // 同時存入 localStorage 作為備份
             localStorage.setItem(key, valueStr);
 
             const { data } = await _supabase.from('portfolio_data').select('*').eq('key', key);
@@ -458,7 +534,10 @@
             }
         }
 
-        window.onload = function() { loadDataFromCloud(); };
+        // 頁面載入時檢查登入狀態
+        window.onload = function() {
+            checkUserSession();
+        };
     </script>
 </body>
 </html>
