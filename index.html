@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光影聚落 - 室內裝潢設計作品集</title>
+    <style>
+        :root {
+            --bg-color: #f7f5f0;
+            --text-main: #2c2b2a;
+            --text-muted: #78746d;
+            --accent: #a38260;
+            --line-color: #e3dec9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.8;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* 頂部導覽列 */
+        .global-top-bar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-link-btn {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--line-color);
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .nav-link-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .home-view, .page-view {
+            display: flex;
+            flex-direction: column;
+            gap: 80px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .page-view {
+            display: none;
+            padding-top: 20px;
+        }
+
+        .page-back-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--line-color);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        .page-back-bar h2 {
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        /* 封面區塊 */
+        .portfolio-cover {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .cover-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .cover-tag {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .cover-title-group h1 {
+            font-size: 3rem;
+            letter-spacing: 6px;
+            margin: 0 0 15px 0;
+            font-weight: 300;
+        }
+
+        .cover-title-group p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .cover-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 60px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .cover-footer span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+        }
+
+        .cover-nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .enter-btn {
+            background: transparent;
+            color: var(--text-main);
+            border: none;
+            border-bottom: 1px solid var(--text-main);
+            padding: 6px 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .enter-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            padding-left: 5px;
+        }
+
+        .cover-preview-box {
+            width: 100%;
+            max-width: 380px;
+            height: 480px;
+            background: #ede9e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-align: center;
+            overflow: hidden;
+            border: 1px solid var(--line-color);
+        }
+
+        .cover-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 專案清單目錄 */
+        .portfolio-index {
+            margin-top: 20px;
+        }
+
+        .index-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--line-color);
+            padding-bottom: 20px;
+        }
+
+        .index-title-group span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+        }
+
+        .index-title-group h2 {
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-top: 6px;
+            letter-spacing: 2px;
+        }
+
+        .project-file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--line-color);
+            padding: 30px 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .project-file-item:hover {
+            padding-left: 15px;
+        }
+
+        .project-file-info {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .file-icon {
+            font-size: 1rem;
+            color: var(--accent);
+        }
+
+        .project-file-info h3 {
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+
+        .project-file-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .file-action-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .project-file-item:hover .file-action-hint {
+            color: var(--accent);
+        }
+
+        /* 關於與理念、服務項目樣式 */
+        .content-section-block {
+            margin-bottom: 60px;
+        }
+
+        .content-section-block h3 {
+            font-size: 1.3rem;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+            padding-left: 12px;
+        }
+
+        .about-top-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 40px;
+            align-items: start;
+            margin-bottom: 40px;
+        }
+
+        .profile-img-box {
+            width: 100%;
+            height: 420px;
+            background: #ede9e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border: 1px solid var(--line-color);
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .profile-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .site-story-container {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            margin-top: 40px;
+        }
+
+        .site-story-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .site-story-row.reverse {
+            direction: rtl;
+        }
+        .site-story-row.reverse > * {
+            direction: ltr;
+        }
+
+        .site-story-img {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            background: #ede9e1;
+            border: 1px solid var(--line-color);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-radius: 4px;
+        }
+
+        .site-story-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .site-story-content {
+            background: #f2efe9;
+            border: 1px solid var(--line-color);
+            padding: 35px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .site-story-tag {
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .site-story-content h4 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .site-story-content p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .certs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .cert-img-box {
+            width: 100%;
+            background: transparent !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border: none !important;
+            overflow: visible !important;
+            text-align: center;
+        }
+
+        .cert-img-box img {
+            width: 100% !important;
+            height: auto !important;
+            max-width: 100%;
+            max-height: none !important;
+            object-fit: contain !important;
+            display: block;
+        }
+
+        .about-grid, .service-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .card-box {
+            background: #f2efe9;
+            border: 1px solid var(--line-color);
+            padding: 30px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card-box h4 {
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .card-box p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .process-steps-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+
+        .process-step-card {
+            background: #f2efe9;
+            border: 1px solid var(--line-color);
+            padding: 20px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .process-step-num {
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .process-step-card h5 {
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .process-step-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* 一頁式專案檢視 */
+        .project-detail-view {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+            position: relative;
+        }
+
+        .sticky-top-bar {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            background: rgba(247, 245, 240, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--line-color);
+            padding: 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .sticky-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .project-badge {
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .sticky-title {
+            font-size: 1.1rem;
+            font-weight: 350;
+            letter-spacing: 1px;
+        }
+
+        .back-index-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .back-index-btn:hover {
+            color: var(--accent);
+        }
+
+        .scroll-layout {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .sections-container {
+            display: flex;
+            flex-direction: column;
+            gap: 100px;
+        }
+
+        .section-card {
+            scroll-margin-top: 120px;
+        }
+
+        .slide-top-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--line-color);
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+        }
+
+        .slide-chapter-title {
+            font-size: 1.4rem;
+            font-weight: 350;
+            letter-spacing: 1.5px;
+        }
+
+        .slide-content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 50px;
+            align-items: start;
+        }
+
+        .slide-info-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .slide-subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .slide-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.9;
+        }
+
+        .slide-bullet-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 5px;
+            font-size: 0.85rem;
+        }
+
+        .slide-bullet-list li::before {
+            content: "— ";
+            color: var(--accent);
+            font-weight: 300;
+        }
+
+        .slide-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--line-color);
+            margin-top: 10px;
+        }
+
+        .spec-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .spec-value {
+            font-size: 0.95rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        .slide-img-placeholder.is-fluid {
+            background: transparent !important;
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            border: none !important;
+        }
+
+        .slide-img-placeholder.is-fluid img {
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            object-fit: contain !important;
+            display: block;
+        }
+
+        .slide-img-placeholder {
+            width: 100%;
+            height: 380px;
+            background: #ede9e1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            gap: 10px;
+            letter-spacing: 1px;
+            overflow: hidden;
+            border: 1px solid var(--line-color);
+        }
+
+        .slide-img-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .dual-floor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .hero-banner-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .hero-banner-box {
+            width: 100%;
+            height: 420px;
+            background: transparent !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            gap: 10px;
+            letter-spacing: 1px;
+            overflow: hidden;
+            border: none !important;
+        }
+
+        .hero-banner-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .mod05-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .mod05-box {
+            width: 100%;
+            height: 240px;
+            background: transparent !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            gap: 10px;
+            letter-spacing: 1px;
+            overflow: hidden;
+            border: none !important;
+        }
+
+        .mod05-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .hero-banner-text {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .toc-sidebar {
+            position: sticky;
+            top: 100px;
+        }
+
+        .toc-sidebar h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--line-color);
+        }
+
+        .toc-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toc-item a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: block;
+            padding: 4px 0;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        .toc-item a:hover {
+            color: var(--accent);
+            padding-left: 6px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1024px) {
+            .scroll-layout { grid-template-columns: 1fr; }
+            .toc-sidebar { display: none; }
+            .about-top-grid, .about-grid, .service-grid, .process-steps-container, .site-story-row, .dual-floor-grid, .mod05-grid { grid-template-columns: 1fr; }
+            .site-story-row.reverse { direction: ltr; }
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-cover, .slide-content-grid, .certs-grid, .site-story-row, .dual-floor-grid, .mod05-grid { grid-template-columns: 1fr; }
+            .site-story-row.reverse { direction: ltr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="global-top-bar">
+        <button class="nav-link-btn" onclick="showHomeView()">首頁</button>
+        <button class="nav-link-btn" onclick="showAboutPage()">關於與理念</button>
+        <button class="nav-link-btn" onclick="showServicesPage()">服務項目與流程</button>
+    </div>
+
+    <div class="container">
+        <!-- 首頁 -->
+        <div id="homeView" class="home-view">
+            <div class="portfolio-cover">
+                <div class="cover-left">
+                    <div id="coverTagText" class="cover-tag">Studio Portfolio</div>
+                    <div class="cover-title-group">
+                        <h1 id="coverMainTitle">光影聚落</h1>
+                        <p id="coverSubTitle">住宅室內設計作品集</p>
+                    </div>
+                    <div class="cover-footer">
+                        <span id="coverFooterText">DESIGN PRESENTATION 2026</span>
+                        <div class="cover-nav-links">
+                            <button class="enter-btn" onclick="showAboutPage()">關於設計師 &rarr;</button>
+                            <button class="enter-btn" onclick="scrollToIndex()">瀏覽專案列表 &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="cover-right">
+                    <div id="coverPreviewBox" class="cover-preview-box">[ 封面主視覺展示區 ]</div>
+                </div>
+            </div>
+
+            <div id="indexSection" class="portfolio-index">
+                <div class="index-header">
+                    <div class="index-title-group">
+                        <span>PROJECT DIRECTORY / 專案檔案清單</span>
+                        <h2>作品集目錄</h2>
+                    </div>
+                    <button class="enter-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">&uarr; 回封面</button>
+                </div>
+                <div id="projectListContainer" class="project-list"></div>
+            </div>
+        </div>
+
+        <!-- 關於與設計理念分頁 -->
+        <div id="aboutPageView" class="page-view">
+            <div class="page-back-bar">
+                <h2>關於設計師與設計理念</h2>
+                <button class="enter-btn" onclick="showHomeView()">&larr; 返回首頁</button>
+            </div>
+            
+            <div class="content-section-block">
+                <h3>DESIGNER PROFILE / 關於設計師</h3>
+                <div class="about-top-grid">
+                    <div id="aboutProfileImgBox" class="profile-img-box">[ 個人形象照片 ]</div>
+                    <div class="about-grid" style="grid-template-columns: 1fr; gap: 20px;">
+                        <div class="card-box">
+                            <h4 id="about_box1_title">專業背景與經歷</h4>
+                            <p id="about_box1_desc">擁有多年室內空間規劃與工程管理實務經驗...</p>
+                        </div>
+                        <div class="card-box">
+                            <h4 id="about_box2_title">美學與風格定位</h4>
+                            <p id="about_box2_desc">擅長日式無印（Muji）、Japandi 與現代極簡風格...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 60px;">
+                    <h4 style="font-size: 1.1rem; font-weight: 400; letter-spacing: 1px; margin-bottom: 25px; color: var(--accent);">現場監造與工藝紀實 / Site Journal</h4>
+                    <div id="siteStoryContainer" class="site-story-container"></div>
+                </div>
+
+                <div style="margin-top: 60px;">
+                    <h4 style="font-size: 1.1rem; font-weight: 400; letter-spacing: 1px; margin-bottom: 15px; color: var(--accent);">專業證照與資格</h4>
+                    <div class="certs-grid">
+                        <div id="aboutCert1Box" class="cert-img-box">[ 證照 01 ]</div>
+                        <div id="aboutCert2Box" class="cert-img-box">[ 證照 02 ]</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section-block" style="margin-top: 60px;">
+                <h3>DESIGN PHILOSOPHY / 設計理念</h3>
+                <div class="about-grid">
+                    <div class="card-box">
+                        <h4 id="phil_box1_title">1. 動線與機能優先</h4>
+                        <p id="phil_box1_desc">以實際居住者的生活軌跡與收納需求出發...</p>
+                    </div>
+                    <div class="card-box">
+                        <h4 id="phil_box2_title">2. 自然質感與材質對話</h4>
+                        <p id="phil_box2_desc">強調材質本身的自然觸感...</p>
+                    </div>
+                    <div class="card-box">
+                        <h4 id="phil_box3_title">3. 精準工程與高還原度</h4>
+                        <p id="phil_box3_desc">重視從前端 3D 提案到後端施工的嚴謹對接...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 服務項目分頁 -->
+        <div id="servicesPageView" class="page-view">
+            <div class="page-back-bar">
+                <h2>服務項目與標準流程</h2>
+                <button class="enter-btn" onclick="showHomeView()">&larr; 返回首頁</button>
+            </div>
+
+            <div class="content-section-block">
+                <h3>OUR SERVICES / 核心服務項目</h3>
+                <div class="service-grid">
+                    <div class="card-box">
+                        <h4 id="serv_box1_title">住宅空間整體設計與工程裝修</h4>
+                        <p id="serv_box1_desc">針對新成屋或毛胚屋提供一條龍完整服務。</p>
+                    </div>
+                    <div class="card-box">
+                        <h4 id="serv_box2_title">老屋翻新與基礎工程改造</h4>
+                        <p id="serv_box2_desc">專業處理老屋常見的漏水與管線老化。</p>
+                    </div>
+                    <div class="card-box">
+                        <h4 id="serv_box3_title">預售屋客變與變更規劃</h4>
+                        <p id="serv_box3_desc">在建商施工前先行介入調整隔間。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section-block" style="margin-top: 60px;">
+                <h3>WORKFLOW / 標準接案流程與收費</h3>
+                <div class="process-steps-container">
+                    <div class="process-step-card"><span class="process-step-num">STEP 01</span><h5 id="step_1_title">初步諮詢與丈量</h5><p id="step_1_desc">需求訪談與丈量記錄。</p></div>
+                    <div class="process-step-card"><span class="process-step-num">STEP 02</span><h5 id="step_2_title">平面提案與簽約</h5><p id="step_2_desc">動線配置規劃與合約簽訂。</p></div>
+                    <div class="process-step-card"><span class="process-step-num">STEP 03</span><h5 id="step_3_title">細部設計與立面</h5><p id="step_3_desc">3D 擬真渲染與施工圖繪製。</p></div>
+                    <div class="process-step-card"><span class="process-step-num">STEP 04</span><h5 id="step_4_title">工程報價與監造</h5><p id="step_4_desc">透明工程報價與現場監造。</p></div>
+                    <div class="process-step-card"><span class="process-step-num">STEP 05</span><h5 id="step_5_title">完工驗收交屋</h5><p id="step_5_desc">軟裝定位與驗收交屋。</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 專案一頁式檢視 -->
+        <div id="detailSection" class="project-detail-view">
+            <div class="sticky-top-bar">
+                <div class="sticky-title-group">
+                    <span id="projectBadge" class="project-badge">專案名稱</span>
+                    <h2 id="stickyTitle" class="sticky-title">一頁式完整專案閱覽</h2>
+                </div>
+                <button class="back-index-btn" onclick="goHome()"><span>&larr; 返回專案列表</span></button>
+            </div>
+            <div class="scroll-layout">
+                <div id="sectionsContainer" class="sections-container"></div>
+                <div class="toc-sidebar">
+                    <h4>專案章節快速導覽</h4>
+                    <ul id="tocList" class="toc-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 預設資料
+        const defaultGlobalData = { tag: 'Studio Portfolio', title: '光影聚落', subtitle: '住宅室內設計作品集', footer: 'DESIGN PRESENTATION 2026', imgUrl: '' };
+        const defaultAboutData = {
+            profileImg: '', cert1Img: '', cert2Img: '',
+            siteImgs: ['', '', '', '', '', ''],
+            siteStories: [
+                { tag: '01 / 磁磚與牆面垂直度', title: '大板磚平整度嚴格把關', desc: '搭配專業整平器精準確認每一塊大板磚的縫隙與垂直度。' },
+                { tag: '02 / 窗框防水與細部維護', title: '不放過任何看不見的細節', desc: '親自深入第一線進行窗框周邊清潔與防水細節維護。' },
+                { tag: '03 / 燈光與弱電配線驗收', title: '光影氛圍的精準定位', desc: '現場實際核對天花板崁燈開孔位置與弱電出線口。' },
+                { tag: '04 / 結構與木料尺寸覆核', title: '嚴謹的工程尺寸掌控', desc: '從木作角材到板材尺寸，在現場親自覆核。' },
+                { tag: '05 / 特殊塗料調色打樣', title: '材質與色彩的親身實驗', desc: '在現場親自動手調配特殊礦物塗料並進行試刷打樣。' },
+                { tag: '06 / 親力親為的職人精神', title: '對空間溫度的堅持', desc: '用雙手與專業經驗雕琢出理想生活容器。' }
+            ]
+        };
+
+        function createDefaultProjectTemplate(name, subtitleText) {
+            return {
+                name: name, subtitleText: subtitleText,
+                sections: {
+                    'sec-01': { title: '模組 01 | 專案開場與基本數據卡', layout: 'mod01', themeName: '日光與木紋的交響', soulSlogan: '讓20年老屋重獲新生', propertyType: '中古屋翻新', areaLayout: '室內 65坪 / 3房 2廳', style: 'Japandi 現代日式風', materials: '微水泥、橡木鋼刷木皮', scope: '全室設計統包工程', desc: '第一眼建立質感與視覺氣場。', imgUrl: '' },
+                    'sec-02': { title: '模組 02 | 痛點診斷與設計策略', layout: 'mod02', subtitle: '深入聽懂需求與解決空間問題', painPoints: '1. 採光與動線不良\n2. 收納空間不足', solutions: '解法1：拆除牆面引光入室\n解法2：設置隱藏收納櫃', imgUrl: '' },
+                    'sec-03': { title: '模組 03 | 平面格局變革 Before / After', layout: 'mod03', subtitle: '專業設計師的核心技術張力', desc: '打破過往繁複的隔間，以中島為中心重新梳理公領域動線。', beforeText: '原始平面圖 (Before)', beforeImgUrl: '', afterText: '改造後平面圖 (After)', afterImgUrl: '' },
+                    'sec-04': { title: '模組 04 | 空間主場景與光影開箱', layout: 'mod04', subtitle: '公私領域沉浸式空間巡禮', items: [{ title: '溫潤木質與微光交織的社交生活中心', desc: '玄關與客廳大場景。', imgUrl: '' }] },
+                    'sec-05': { title: '模組 05 | 細節工藝、材質與工程堅持', layout: 'mod05', subtitle: '萬用轉化關鍵', items: [{ title: '微觀收邊：無邊框門縫與藝術塗料肌理。', imgUrl: '' }] }
+                }
+            };
+        }
+
+        const defaultProjectsData = {
+            'proj-01': createDefaultProjectTemplate('01. 現代光影宅邸 (Modern Light Residence)', '住宅空間設計案 - 65坪現代風'),
+            'proj-02': createDefaultProjectTemplate('02. 微光山居行館 (Mountain Villa)', '休閒渡假行館案 - 110坪自然風')
+        };
+
+        // 從 localStorage 讀取後台儲存的最新資料
+        let globalData = JSON.parse(localStorage.getItem('portfolio_global_data')) || defaultGlobalData;
+        let aboutData = JSON.parse(localStorage.getItem('portfolio_about_data')) || defaultAboutData;
+        let projectsData = JSON.parse(localStorage.getItem('portfolio_projects_data')) || JSON.parse(JSON.stringify(defaultProjectsData));
+
+        function applyGlobalData() {
+            document.getElementById('coverTagText').innerText = globalData.tag;
+            document.getElementById('coverMainTitle').innerText = globalData.title;
+            document.getElementById('coverSubTitle').innerText = globalData.subtitle;
+            document.getElementById('coverFooterText').innerText = globalData.footer;
+
+            const previewBox = document.getElementById('coverPreviewBox');
+            if (globalData.imgUrl) previewBox.innerHTML = `<img src="${globalData.imgUrl}" alt="封面主視覺">`;
+
+            const profileBox = document.getElementById('aboutProfileImgBox');
+            if (aboutData.profileImg) profileBox.innerHTML = `<img src="${aboutData.profileImg}" alt="個人照片">`;
+
+            const cert1Box = document.getElementById('aboutCert1Box');
+            if (aboutData.cert1Img) cert1Box.innerHTML = `<img src="${aboutData.cert1Img}" alt="證照 01">`;
+
+            const siteStoryContainer = document.getElementById('siteStoryContainer');
+            if (siteStoryContainer && aboutData.siteStories) {
+                siteStoryContainer.innerHTML = aboutData.siteStories.map((story, i) => {
+                    const imgUrl = aboutData.siteImgs ? aboutData.siteImgs[i] : '';
+                    const imgTag = imgUrl ? `<img src="${imgUrl}" alt="工程圖說">` : `[ 現場工程圖說 0${i+1} ]`;
+                    const isReverse = (i % 2 === 1) ? ' reverse' : '';
+                    return `
+                        <div class="site-story-row${isReverse}">
+                            <div class="site-story-img">${imgTag}</div>
+                            <div class="site-story-content">
+                                <span class="site-story-tag">${story.tag || ''}</span>
+                                <h4>${story.title || ''}</h4>
+                                <p>${story.desc || ''}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderProjectList() {
+            const container = document.getElementById('projectListContainer');
+            container.innerHTML = '';
+            for (const [projKey, projVal] of Object.entries(projectsData)) {
+                const item = document.createElement('div');
+                item.className = 'project-file-item';
+                item.onclick = () => loadProject(projKey);
+                item.innerHTML = `
+                    <div class="project-file-info">
+                        <span class="file-icon">/</span>
+                        <div><h3>${projVal.name}</h3><p>${projVal.subtitleText}</p></div>
+                    </div>
+                    <span class="file-action-hint">檢視專案 &rarr;</span>
+                `;
+                container.appendChild(item);
+            }
+        }
+
+        function scrollToIndex() { document.getElementById('indexSection').scrollIntoView({ behavior: 'smooth' }); }
+        function showHomeView() {
+            document.getElementById('aboutPageView').style.display = 'none';
+            document.getElementById('servicesPageView').style.display = 'none';
+            document.getElementById('detailSection').style.display = 'none';
+            document.getElementById('homeView').style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function showAboutPage() {
+            document.getElementById('homeView').style.display = 'none';
+            document.getElementById('servicesPageView').style.display = 'none';
+            document.getElementById('detailSection').style.display = 'none';
+            document.getElementById('aboutPageView').style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function showServicesPage() {
+            document.getElementById('homeView').style.display = 'none';
+            document.getElementById('aboutPageView').style.display = 'none';
+            document.getElementById('detailSection').style.display = 'none';
+            document.getElementById('servicesPageView').style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function loadProject(projKey) {
+            const proj = projectsData[projKey];
+            if (!proj) return;
+            document.getElementById('homeView').style.display = 'none';
+            document.getElementById('aboutPageView').style.display = 'none';
+            document.getElementById('servicesPageView').style.display = 'none';
+            document.getElementById('detailSection').style.display = 'block';
+            document.getElementById('projectBadge').innerText = proj.name;
+
+            const sectionsContainer = document.getElementById('sectionsContainer');
+            const tocList = document.getElementById('tocList');
+            sectionsContainer.innerHTML = '';
+            tocList.innerHTML = '';
+
+            for (const [secKey, data] of Object.entries(proj.sections)) {
+                const shortTitle = data.title.split(' | ')[1] || data.title;
+                const tocLi = document.createElement('li');
+                tocLi.className = 'toc-item';
+                tocLi.innerHTML = `<a href="#${secKey}">${shortTitle}</a>`;
+                tocList.appendChild(tocLi);
+
+                const card = document.createElement('div');
+                card.id = secKey;
+                card.className = 'section-card';
+                let innerContent = '';
+
+                if (data.layout === 'mod01') {
+                    const imgTag = data.imgUrl ? `<img src="${data.imgUrl}" alt="專案主圖">` : `<span>[ 專案主圖展示區 ]</span>`;
+                    innerContent = `
+                        <div class="slide-content-grid">
+                            <div class="slide-info-pane">
+                                <h3 class="slide-subtitle">《${data.themeName}》</h3>
+                                <p class="slide-desc" style="font-weight: 500;">“ ${data.soulSlogan} ”</p>
+                                <div class="slide-specs" style="grid-template-columns: 1fr;">
+                                    <div><span class="spec-label">空間性質</span><span class="spec-value">${data.propertyType}</span></div>
+                                    <div><span class="spec-label">坪數與格局</span><span class="spec-value">${data.areaLayout}</span></div>
+                                    <div><span class="spec-label">空間風格</span><span class="spec-value">${data.style}</span></div>
+                                    <div><span class="spec-label">主要材質</span><span class="spec-value">${data.materials}</span></div>
+                                    <div><span class="spec-label">服務範疇</span><span class="spec-value">${data.scope}</span></div>
+                                </div>
+                            </div>
+                            <div class="slide-visual-pane"><div class="slide-img-placeholder" style="height: 420px;">${imgTag}</div></div>
+                        </div>
+                    `;
+                } else if (data.layout === 'mod02') {
+                    const imgTag = data.imgUrl ? `<img src="${data.imgUrl}" alt="痛點分析">` : `<span>[ 痛點情境圖 ]</span>`;
+                    const pains = data.painPoints ? data.painPoints.split('\n') : [];
+                    const sols = data.solutions ? data.solutions.split('\n') : [];
+                    innerContent = `
+                        <div class="slide-content-grid">
+                            <div class="slide-info-pane">
+                                <h3 class="slide-subtitle">原始屋況限制與需求</h3>
+                                <ul class="slide-bullet-list">${pains.map(p => `<li>${p}</li>`).join('')}</ul>
+                                <h3 class="slide-subtitle" style="margin-top: 15px;">核心設計解法</h3>
+                                <ul class="slide-bullet-list">${sols.map(s => `<li>${s}</li>`).join('')}</ul>
+                            </div>
+                            <div class="slide-visual-pane"><div class="slide-img-placeholder is-fluid">${imgTag}</div></div>
+                        </div>
+                    `;
+                } else if (data.layout === 'mod03') {
+                    const beforeImgTag = data.beforeImgUrl ? `<img src="${data.beforeImgUrl}" alt="Before 平面圖">` : `<span>[ 原始平面圖 Before ]</span>`;
+                    const afterImgTag = data.afterImgUrl ? `<img src="${data.afterImgUrl}" alt="After 平面圖">` : `<span>[ 改造後平面圖 After ]</span>`;
+                    innerContent = `
+                        <div class="hero-banner-layout">
+                            <div class="dual-floor-grid">
+                                <div><div class="slide-img-placeholder is-fluid">${beforeImgTag}</div><p style="text-align: center; margin-top: 15px;">${data.beforeText || '原始平面圖'}</p></div>
+                                <div><div class="slide-img-placeholder is-fluid">${afterImgTag}</div><p style="text-align: center; margin-top: 15px;">${data.afterText || '改造後平面圖'}</p></div>
+                            </div>
+                            <p class="hero-banner-text" style="margin-top: 25px; text-align: center;">${data.desc || ''}</p>
+                        </div>
+                    `;
+                } else if (data.layout === 'mod04') {
+                    let itemsHtml = '';
+                    if (data.items) {
+                        itemsHtml = data.items.map(item => {
+                            const imgTag = item.imgUrl ? `<img src="${item.imgUrl}" alt="空間照片">` : `<span>[ 空間照片 ]</span>`;
+                            return `<div style="margin-bottom: 50px;"><h3 class="slide-subtitle" style="margin-bottom: 12px;">• ${item.title || ''}</h3><div class="hero-banner-box">${imgTag}</div><p class="hero-banner-text">${item.desc || ''}</p></div>`;
+                        }).join('');
+                    }
+                    innerContent = `<div class="hero-banner-layout">${itemsHtml}</div>`;
+                } else if (data.layout === 'mod05') {
+                    let itemsHtml = '';
+                    if (data.items) {
+                        itemsHtml = data.items.map(item => {
+                            const imgTag = item.imgUrl ? `<img src="${item.imgUrl}" alt="工藝照片">` : `<span>[ 細節工藝特寫 ]</span>`;
+                            return `<div style="display: flex; flex-direction: column; gap: 10px;"><div class="mod05-box">${imgTag}</div><p class="hero-banner-text" style="font-size: 0.85rem;">${item.title || ''}</p></div>`;
+                        }).join('');
+                    }
+                    innerContent = `<div class="mod05-grid">${itemsHtml}</div>`;
+                }
+
+                card.innerHTML = `<div class="slide-top-meta"><h3 class="slide-chapter-title">${data.title}</h3></div>${innerContent}`;
+                sectionsContainer.appendChild(card);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goHome() { showHomeView(); }
+
+        window.onload = function() {
+            applyGlobalData();
+            renderProjectList();
+        };
+    </script>
+</body>
+</html>

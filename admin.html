@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光影聚落 - 管理後台 (CMS)</title>
+    <style>
+        :root {
+            --bg-color: #f7f5f0;
+            --text-main: #2c2b2a;
+            --text-muted: #78746d;
+            --accent: #a38260;
+            --line-color: #e3dec9;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 40px 20px; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; border: 1px solid var(--line-color); padding: 40px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--line-color); padding-bottom: 15px; }
+        .admin-header h2 { font-size: 1.5rem; font-weight: 400; }
+        .admin-actions-bar { display: flex; gap: 10px; }
+        .btn-primary, .btn-secondary, .btn-danger { border: none; padding: 8px 16px; font-size: 0.85rem; cursor: pointer; letter-spacing: 1px; border-radius: 4px; transition: background 0.3s; }
+        .btn-primary { background: var(--text-main); color: #fff; }
+        .btn-primary:hover { background: var(--accent); }
+        .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--line-color); }
+        .btn-secondary:hover { border-color: var(--text-main); }
+        .btn-danger { background: #c55a5a; color: #fff; padding: 6px 12px; font-size: 0.8rem; }
+        .admin-tabs-nav { display: flex; gap: 5px; border-bottom: 2px solid var(--line-color); margin-bottom: 25px; flex-wrap: wrap; }
+        .admin-tab-btn { background: #faf8f5; border: 1px solid var(--line-color); border-bottom: none; padding: 10px 20px; font-size: 0.9rem; cursor: pointer; color: var(--text-muted); border-radius: 4px 4px 0 0; }
+        .admin-tab-btn.active { background: #fff; color: var(--text-main); font-weight: 500; border-bottom: 2px solid #fff; margin-bottom: -2px; }
+        .admin-tab-content { display: none; }
+        .admin-tab-content.active { display: block; }
+        .admin-project-card { background: #faf8f5; border: 1px solid var(--line-color); padding: 25px; margin-bottom: 30px; border-radius: 4px; }
+        .admin-section-box { background: #fff; border: 1px solid var(--line-color); padding: 15px; margin-top: 15px; border-radius: 4px; }
+        .admin-form-group { margin-bottom: 15px; }
+        .admin-form-group label { display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .admin-form-group input, .admin-form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--line-color); background: #fff; font-size: 0.95rem; color: var(--text-main); border-radius: 4px; }
+        .admin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="admin-header">
+            <h2>作品集內容與圖片管理後台 (CMS)</h2>
+            <div class="admin-actions-bar">
+                <button class="btn-primary" onclick="addNewProject()">＋ 新增專案</button>
+                <button class="btn-secondary" onclick="resetToDefaultData()">恢復預設值</button>
+                <button class="btn-primary" onclick="saveData()">儲存並關閉後台</button>
+            </div>
+        </div>
+        <div id="adminContainer"></div>
+    </div>
+
+    <script>
+        const defaultGlobalData = { tag: 'Studio Portfolio', title: '光影聚落', subtitle: '住宅室內設計作品集', footer: 'DESIGN PRESENTATION 2026', imgUrl: '' };
+        const defaultAboutData = {
+            profileImg: '', cert1Img: '', cert2Img: '',
+            siteImgs: ['', '', '', '', '', ''],
+            siteStories: [
+                { tag: '01 / 磁磚與牆面垂直度', title: '大板磚平整度嚴格把關', desc: '搭配專業整平器精準確認每一塊大板磚的縫隙與垂直度。' },
+                { tag: '02 / 窗框防水與細部維護', title: '不放過任何看不見的細節', desc: '親自深入第一線進行窗框周邊清潔與防水細節維護。' },
+                { tag: '03 / 燈光與弱電配線驗收', title: '光影氛圍的精準定位', desc: '現場實際核對天花板崁燈開孔位置與弱電出線口。' },
+                { tag: '04 / 結構與木料尺寸覆核', title: '嚴謹的工程尺寸掌控', desc: '從木作角材到板材尺寸，在現場親自覆核。' },
+                { tag: '05 / 特殊塗料調色打樣', title: '材質與色彩的親身實驗', desc: '在現場親自動手調配特殊礦物塗料並進行試刷打樣。' },
+                { tag: '06 / 親力親為的職人精神', title: '對空間溫度的堅持', desc: '用雙手與專業經驗雕琢出理想生活容器。' }
+            ],
+            box1Title: '專業背景與經歷', box1Desc: '擁有多年室內空間規劃與工程管理實務經驗...',
+            box2Title: '美學與風格定位', box2Desc: '擅長日式無印與現代極簡風格...',
+            phil1Title: '1. 動線與機能優先', phil1Desc: '以實際居住者的生活軌跡與收納需求出發...',
+            phil2Title: '2. 自然質感與材質對話', phil2Desc: '強調材質本身的自然觸感...',
+            phil3Title: '3. 精準工程與高還原度', phil3Desc: '重視從前端 3D 提案到後端施工的對接...',
+            serv1Title: '住宅空間整體設計與工程裝修', serv1Desc: '提供一條龍完整服務。',
+            serv2Title: '老屋翻新與基礎工程改造', serv2Desc: '處理漏水與管線老化。',
+            serv3Title: '預售屋客變與變更規劃', serv3Desc: '在建商施工前先行介入。',
+            steps: [
+                { title: '初步諮詢與丈量', desc: '需求訪談與丈量記錄。' },
+                { title: '平面提案與簽約', desc: '動線配置規劃與合約。' },
+                { title: '細部設計與立面', desc: '3D 渲染與施工圖。' },
+                { title: '工程報價與監造', desc: '透明報價與監造。' },
+                { title: '完工驗收交屋', desc: '軟裝定位與交屋。' }
+            ]
+        };
+
+        function createDefaultProjectTemplate(name, subtitleText) {
+            return {
+                name: name, subtitleText: subtitleText,
+                sections: {
+                    'sec-01': { title: '模組 01 | 專案開場與基本數據卡', layout: 'mod01', themeName: '日光與木紋的交響', soulSlogan: '讓20年老屋重獲新生', propertyType: '中古屋翻新', areaLayout: '室內 65坪 / 3房 2廳', style: 'Japandi 現代日式風', materials: '微水泥、橡木鋼刷木皮', scope: '全室設計統包工程', desc: '第一眼建立質感與視覺氣場。', imgUrl: '' },
+                    'sec-02': { title: '模組 02 | 痛點診斷與設計策略', layout: 'mod02', subtitle: '深入聽懂需求與解決空間問題', painPoints: '1. 採光與動線不良\n2. 收納空間不足', solutions: '解法1：拆除牆面引光入室\n解法2：設置隱藏收納櫃', imgUrl: '' },
+                    'sec-03': { title: '模組 03 | 平面格局變革 Before / After', layout: 'mod03', subtitle: '專業設計師的核心技術張力', desc: '打破過往繁複的隔間，以中島為中心重新梳理公領域動線。', beforeText: '原始平面圖 (Before)', beforeImgUrl: '', afterText: '改造後平面圖 (After)', afterImgUrl: '' },
+                    'sec-04': { title: '模組 04 | 空間主場景與光影開箱', layout: 'mod04', subtitle: '公私領域沉浸式空間巡禮', items: [{ title: '溫潤木質與微光交織的社交生活中心', desc: '玄關與客廳大場景。', imgUrl: '' }] },
+                    'sec-05': { title: '模組 05 | 細節工藝、材質與工程堅持', layout: 'mod05', subtitle: '萬用轉化關鍵', items: [{ title: '微觀收邊：無邊框門縫與藝術塗料肌理。', imgUrl: '' }] }
+                }
+            };
+        }
+
+        const defaultProjectsData = {
+            'proj-01': createDefaultProjectTemplate('01. 現代光影宅邸 (Modern Light Residence)', '住宅空間設計案 - 65坪現代風'),
+            'proj-02': createDefaultProjectTemplate('02. 微光山居行館 (Mountain Villa)', '休閒渡假行館案 - 110坪自然風')
+        };
+
+        let globalData = JSON.parse(localStorage.getItem('portfolio_global_data')) || defaultGlobalData;
+        let aboutData = JSON.parse(localStorage.getItem('portfolio_about_data')) || defaultAboutData;
+        let projectsData = JSON.parse(localStorage.getItem('portfolio_projects_data')) || JSON.parse(JSON.stringify(defaultProjectsData));
+
+        function renderAdminTabs() {
+            const container = document.getElementById('adminContainer');
+            container.innerHTML = '';
+            const nav = document.createElement('div');
+            nav.className = 'admin-tabs-nav';
+            const contentArea = document.createElement('div');
+
+            // 1. 封面分頁
+            const coverBtn = document.createElement('button');
+            coverBtn.className = 'admin-tab-btn active';
+            coverBtn.innerText = '🖼️ 封面';
+            coverBtn.onclick = () => switchTab('cover', coverBtn);
+            nav.appendChild(coverBtn);
+
+            const coverContent = document.createElement('div');
+            coverContent.id = 'admin-tab-cover';
+            coverContent.className = 'admin-tab-content active';
+            coverContent.innerHTML = `
+                <div class="admin-project-card">
+                    <h4>首頁封面主視覺編輯</h4>
+                    <div class="admin-form-row" style="margin-top:15px;">
+                        <div class="admin-form-group"><label>標籤 (Tag)</label><input type="text" id="global_tag" value="${globalData.tag}"></div>
+                        <div class="admin-form-group"><label>標題 (Title)</label><input type="text" id="global_title" value="${globalData.title}"></div>
+                    </div>
+                    <div class="admin-form-row">
+                        <div class="admin-form-group"><label>副標題 (Subtitle)</label><input type="text" id="global_subtitle" value="${globalData.subtitle}"></div>
+                        <div class="admin-form-group"><label>底部文字 (Footer)</label><input type="text" id="global_footer" value="${globalData.footer}"></div>
+                    </div>
+                    <div class="admin-form-group">
+                        <label>封面圖片選擇檔案 / 網址</label>
+                        <input type="file" accept="image/*" onchange="handleFileSelect(event, 'global_img')">
+                        <input type="text" id="global_img" value="${globalData.imgUrl || ''}" style="margin-top:5px;">
+                    </div>
+                </div>
+            `;
+            contentArea.appendChild(coverContent);
+
+            // 2. 關於分頁
+            const aboutBtn = document.createElement('button');
+            aboutBtn.className = 'admin-tab-btn';
+            aboutBtn.innerText = '👤 關於與工程圖說';
+            aboutBtn.onclick = () => switchTab('about', aboutBtn);
+            nav.appendChild(aboutBtn);
+
+            let siteStoriesHtml = '';
+            aboutData.siteStories.forEach((story, i) => {
+                const imgUrl = aboutData.siteImgs ? aboutData.siteImgs[i] : '';
+                siteStoriesHtml += `
+                    <div class="admin-section-box">
+                        <h5>工程圖說 #${i + 1}</h5>
+                        <div class="admin-form-row" style="margin-top:10px;">
+                            <div class="admin-form-group"><label>標籤</label><input type="text" id="about_story_tag_${i}" value="${story.tag || ''}"></div>
+                            <div class="admin-form-group"><label>標題</label><input type="text" id="about_story_title_${i}" value="${story.title || ''}"></div>
+                        </div>
+                        <div class="admin-form-group"><label>內文描述</label><textarea id="about_story_desc_${i}" rows="2">${story.desc || ''}</textarea></div>
+                        <div class="admin-form-group">
+                            <label>選擇圖片檔案 / 網址</label>
+                            <input type="file" accept="image/*" onchange="handleFileSelect(event, 'about_siteImg_${i}')">
+                            <input type="text" id="about_siteImg_${i}" value="${imgUrl}" style="margin-top:5px;">
+                        </div>
+                    </div>
+                `;
+            });
+
+            const aboutContent = document.createElement('div');
+            aboutContent.id = 'admin-tab-about';
+            aboutContent.className = 'admin-tab-content';
+            aboutContent.innerHTML = `
+                <div class="admin-project-card">
+                    <h4>個人照片與證照</h4>
+                    <div class="admin-form-row" style="margin-top:15px;">
+                        <div class="admin-form-group">
+                            <label>個人照片選擇檔案 / 網址</label>
+                            <input type="file" accept="image/*" onchange="handleFileSelect(event, 'about_profileImg')">
+                            <input type="text" id="about_profileImg" value="${aboutData.profileImg || ''}" style="margin-top:5px;">
+                        </div>
+                        <div class="admin-form-group">
+                            <label>證照 01 選擇檔案 / 網址</label>
+                            <input type="file" accept="image/*" onchange="handleFileSelect(event, 'about_cert1Img')">
+                            <input type="text" id="about_cert1Img" value="${aboutData.cert1Img || ''}" style="margin-top:5px;">
+                        </div>
+                    </div>
+                    <h4 style="margin-top:25px;">現場工程圖說編輯</h4>
+                    ${siteStoriesHtml}
+                </div>
+            `;
+            contentArea.appendChild(aboutContent);
+
+            // 3. 各專案分頁
+            for (const [projKey, projVal] of Object.entries(projectsData)) {
+                const projBtn = document.createElement('button');
+                projBtn.className = 'admin-tab-btn';
+                projBtn.innerText = projVal.name.split(' ')[0];
+                projBtn.onclick = () => switchTab(projKey, projBtn);
+                nav.appendChild(projBtn);
+
+                let sectionsHtml = '';
+                for (const [secKey, secVal] of Object.entries(projVal.sections)) {
+                    let fieldsHtml = '';
+                    if (secVal.layout === 'mod01') {
+                        fieldsHtml = `
+                            <div class="admin-form-row"><div class="admin-form-group"><label>主題名稱</label><input type="text" id="sec_${projKey}_${secKey}_themeName" value="${secVal.themeName || ''}"></div><div class="admin-form-group"><label>標語</label><input type="text" id="sec_${projKey}_${secKey}_soulSlogan" value="${secVal.soulSlogan || ''}"></div></div>
+                            <div class="admin-form-row"><div class="admin-form-group"><label>空間性質</label><input type="text" id="sec_${projKey}_${secKey}_propertyType" value="${secVal.propertyType || ''}"></div><div class="admin-form-group"><label>坪數與格局</label><input type="text" id="sec_${projKey}_${secKey}_areaLayout" value="${secVal.areaLayout || ''}"></div></div>
+                            <div class="admin-form-row"><div class="admin-form-group"><label>空間風格</label><input type="text" id="sec_${projKey}_${secKey}_style" value="${secVal.style || ''}"></div><div class="admin-form-group"><label>主要材質</label><input type="text" id="sec_${projKey}_${secKey}_materials" value="${secVal.materials || ''}"></div></div>
+                            <div class="admin-form-group"><label>服務範疇</label><input type="text" id="sec_${projKey}_${secKey}_scope" value="${secVal.scope || ''}"></div>
+                            <div class="admin-form-group"><label>主圖選擇檔案 / 網址</label><input type="file" accept="image/*" onchange="handleFileSelect(event, 'sec_${projKey}_${secKey}_imgUrl')"><input type="text" id="sec_${projKey}_${secKey}_imgUrl" value="${secVal.imgUrl || ''}" style="margin-top:5px;"></div>
+                        `;
+                    } else if (secVal.layout === 'mod02') {
+                        fieldsHtml = `
+                            <div class="admin-form-group"><label>原始屋況限制與需求列表 (每行一項)</label><textarea id="sec_${projKey}_${secKey}_painPoints" rows="3">${secVal.painPoints || ''}</textarea></div>
+                            <div class="admin-form-group"><label>核心設計解法 (每行一項)</label><textarea id="sec_${projKey}_${secKey}_solutions" rows="3">${secVal.solutions || ''}</textarea></div>
+                            <div class="admin-form-group"><label>情境圖選擇檔案 / 網址</label><input type="file" accept="image/*" onchange="handleFileSelect(event, 'sec_${projKey}_${secKey}_imgUrl')"><input type="text" id="sec_${projKey}_${secKey}_imgUrl" value="${secVal.imgUrl || ''}" style="margin-top:5px;"></div>
+                        `;
+                    } else if (secVal.layout === 'mod03') {
+                        fieldsHtml = `
+                            <div class="admin-form-row"><div class="admin-form-group"><label>Before 標籤文字</label><input type="text" id="sec_${projKey}_${secKey}_beforeText" value="${secVal.beforeText || ''}"></div><div class="admin-form-group"><label>After 標籤文字</label><input type="text" id="sec_${projKey}_${secKey}_afterText" value="${secVal.afterText || ''}"></div></div>
+                            <div class="admin-form-group"><label>平面圖註解文案 (說明)</label><textarea id="sec_${projKey}_${secKey}_desc" rows="2">${secVal.desc || ''}</textarea></div>
+                            <div class="admin-form-row">
+                                <div class="admin-form-group"><label>原始平面圖 (Before) 選擇檔案 / 網址</label><input type="file" accept="image/*" onchange="handleFileSelect(event, 'sec_${projKey}_${secKey}_beforeImgUrl')"><input type="text" id="sec_${projKey}_${secKey}_beforeImgUrl" value="${secVal.beforeImgUrl || ''}" style="margin-top:5px;"></div>
+                                <div class="admin-form-group"><label>改造後平面圖 (After) 選擇檔案 / 網址</label><input type="file" accept="image/*" onchange="handleFileSelect(event, 'sec_${projKey}_${secKey}_afterImgUrl')"><input type="text" id="sec_${projKey}_${secKey}_afterImgUrl" value="${secVal.afterImgUrl || ''}" style="margin-top:5px;"></div>
+                            </div>
+                        `;
+                    } else if (secVal.layout === 'mod04' || secVal.layout === 'mod05') {
+                        let dynHtml = '';
+                        if (secVal.items) {
+                            secVal.items.forEach((item, idx) => {
+                                dynHtml += `<div class="admin-section-box">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--accent);">圖文項目 #${idx + 1}</span>
+                                        <button class="btn-danger" type="button" onclick="removeItem('${projKey}', '${secKey}', ${idx})">刪除此項</button>
+                                    </div>
+                                    <label>標題或圖說註解 (Title)</label><input type="text" class="dyn_title_${projKey}_${secKey}" value="${item.title || ''}">
+                                    ${secVal.layout === 'mod04' ? `<label style="margin-top:5px;">詳細描述 (Description)</label><textarea class="dyn_desc_${projKey}_${secKey}" rows="2">${item.desc || ''}</textarea>` : ''}
+                                    <label style="margin-top:5px;">圖片選擇檔案 / 網址</label><input type="file" accept="image/*" onchange="handleDynFileSelect(event, this)"><input type="text" class="dyn_img_${projKey}_${secKey}" value="${item.imgUrl || ''}" style="margin-top:5px;">
+                                </div>`;
+                            });
+                        }
+                        fieldsHtml = `${dynHtml}<button class="btn-secondary" type="button" style="margin-top: 10px;" onclick="addItem('${projKey}', '${secKey}')">＋ 新增一組圖文</button>`;
+                    }
+
+                    sectionsHtml += `
+                        <div class="admin-section-box">
+                            <h5>${secVal.title}</h5>
+                            <div class="admin-form-group" style="margin-top:10px;"><label>模組大標題</label><input type="text" id="sec_${projKey}_${secKey}_title" value="${secVal.title}"></div>
+                            ${fieldsHtml}
+                        </div>
+                    `;
+                }
+
+                const projContent = document.createElement('div');
+                projContent.id = `admin-tab-${projKey}`;
+                projContent.className = 'admin-tab-content';
+                projContent.innerHTML = `
+                    <div class="admin-project-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h4>專案名稱: ${projVal.name}</h4>
+                            <button class="btn-danger" onclick="deleteProject('${projKey}')">刪除專案</button>
+                        </div>
+                        <div class="admin-form-row">
+                            <div class="admin-form-group"><label>專案名稱</label><input type="text" id="name_${projKey}" value="${projVal.name}"></div>
+                            <div class="admin-form-group"><label>副標題</label><input type="text" id="sub_${projKey}" value="${projVal.subtitleText}"></div>
+                        </div>
+                        ${sectionsHtml}
+                    </div>
+                `;
+                contentArea.appendChild(projContent);
+            }
+
+            container.appendChild(nav);
+            container.appendChild(contentArea);
+        }
+
+        function switchTab(id, btn) {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`admin-tab-${id}`).classList.add('active');
+        }
+
+        function handleFileSelect(event, targetInputId) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(targetInputId).value = e.target.result;
+                    alert('圖片已成功載入！');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleDynFileSelect(event, fileInputElem) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const textInput = fileInputElem.nextElementSibling;
+                    if (textInput) {
+                        textInput.value = e.target.result;
+                        alert('圖片已成功載入！');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addItem(projKey, secKey) {
+            if (!projectsData[projKey].sections[secKey].items) {
+                projectsData[projKey].sections[secKey].items = [];
+            }
+            projectsData[projKey].sections[secKey].items.push({ title: '新圖說標題說明', desc: '詳細描述...', imgUrl: '' });
+            renderAdminTabs();
+            const btn = Array.from(document.querySelectorAll('.admin-tab-btn')).find(b => b.innerText.includes(projectsData[projKey].name.split(' ')[0]));
+            if (btn) switchTab(projKey, btn);
+        }
+
+        function removeItem(projKey, secKey, index) {
+            projectsData[projKey].sections[secKey].items.splice(index, 1);
+            renderAdminTabs();
+            const btn = Array.from(document.querySelectorAll('.admin-tab-btn')).find(b => b.innerText.includes(projectsData[projKey].name.split(' ')[0]));
+            if (btn) switchTab(projKey, btn);
+        }
+
+        function saveData() {
+            globalData.tag = document.getElementById('global_tag').value;
+            globalData.title = document.getElementById('global_title').value;
+            globalData.subtitle = document.getElementById('global_subtitle').value;
+            globalData.footer = document.getElementById('global_footer').value;
+            globalData.imgUrl = document.getElementById('global_img').value;
+
+            aboutData.profileImg = document.getElementById('about_profileImg').value;
+            aboutData.cert1Img = document.getElementById('about_cert1Img').value;
+
+            for (let i = 0; i < 6; i++) {
+                aboutData.siteStories[i].tag = document.getElementById(`about_story_tag_${i}`).value;
+                aboutData.siteStories[i].title = document.getElementById(`about_story_title_${i}`).value;
+                aboutData.siteStories[i].desc = document.getElementById(`about_story_desc_${i}`).value;
+                aboutData.siteImgs[i] = document.getElementById(`about_siteImg_${i}`).value;
+            }
+
+            for (const [projKey, projVal] of Object.entries(projectsData)) {
+                projVal.name = document.getElementById(`name_${projKey}`).value;
+                projVal.subtitleText = document.getElementById(`sub_${projKey}`).value;
+
+                for (const secKey of Object.keys(projVal.sections)) {
+                    const sec = projVal.sections[secKey];
+                    sec.title = document.getElementById(`sec_${projKey}_${secKey}_title`).value;
+                    if (sec.layout === 'mod01') {
+                        sec.themeName = document.getElementById(`sec_${projKey}_${secKey}_themeName`).value;
+                        sec.soulSlogan = document.getElementById(`sec_${projKey}_${secKey}_soulSlogan`).value;
+                        sec.propertyType = document.getElementById(`sec_${projKey}_${secKey}_propertyType`).value;
+                        sec.areaLayout = document.getElementById(`sec_${projKey}_${secKey}_areaLayout`).value;
+                        sec.style = document.getElementById(`sec_${projKey}_${secKey}_style`).value;
+                        sec.materials = document.getElementById(`sec_${projKey}_${secKey}_materials`).value;
+                        sec.scope = document.getElementById(`sec_${projKey}_${secKey}_scope`).value;
+                        sec.imgUrl = document.getElementById(`sec_${projKey}_${secKey}_imgUrl`).value;
+                    } else if (sec.layout === 'mod02') {
+                        sec.painPoints = document.getElementById(`sec_${projKey}_${secKey}_painPoints`).value;
+                        sec.solutions = document.getElementById(`sec_${projKey}_${secKey}_solutions`).value;
+                        sec.imgUrl = document.getElementById(`sec_${projKey}_${secKey}_imgUrl`).value;
+                    } else if (sec.layout === 'mod03') {
+                        sec.beforeText = document.getElementById(`sec_${projKey}_${secKey}_beforeText`).value;
+                        sec.afterText = document.getElementById(`sec_${projKey}_${secKey}_afterText`).value;
+                        sec.desc = document.getElementById(`sec_${projKey}_${secKey}_desc`).value;
+                        sec.beforeImgUrl = document.getElementById(`sec_${projKey}_${secKey}_beforeImgUrl`).value;
+                        sec.afterImgUrl = document.getElementById(`sec_${projKey}_${secKey}_afterImgUrl`).value;
+                    } else if (sec.layout === 'mod04' || sec.layout === 'mod05') {
+                        const titles = document.querySelectorAll(`.dyn_title_${projKey}_${secKey}`);
+                        const descs = document.querySelectorAll(`.dyn_desc_${projKey}_${secKey}`);
+                        const imgs = document.querySelectorAll(`.dyn_img_${projKey}_${secKey}`);
+                        sec.items.forEach((item, idx) => {
+                            if (titles[idx]) item.title = titles[idx].value;
+                            if (descs[idx]) item.desc = descs[idx].value;
+                            if (imgs[idx]) item.imgUrl = imgs[idx].value;
+                        });
+                    }
+                }
+            }
+
+            localStorage.setItem('portfolio_global_data', JSON.stringify(globalData));
+            localStorage.setItem('portfolio_about_data', JSON.stringify(aboutData));
+            localStorage.setItem('portfolio_projects_data', JSON.stringify(projectsData));
+            alert('後台資料與圖片已成功儲存！前台頁面重新整理後即可同步顯示。');
+        }
+
+        function addNewProject() {
+            const newKey = 'proj-' + Date.now();
+            const newName = prompt('請輸入新專案名稱：', '03. 新專案住宅設計案');
+            if (!newName) return;
+            projectsData[newKey] = createDefaultProjectTemplate(newName, '住宅空間設計案 - 50坪');
+            renderAdminTabs();
+            alert('已新增專案，請記得點擊「儲存並關閉後台」！');
+        }
+
+        function deleteProject(projKey) {
+            if (confirm('確定要刪除此專案嗎？')) {
+                delete projectsData[projKey];
+                renderAdminTabs();
+                alert('已刪除！請點擊「儲存並關閉後台」。');
+            }
+        }
+
+        function resetToDefaultData() {
+            if (confirm('確定要恢復預設值嗎？')) {
+                localStorage.clear();
+                globalData = JSON.parse(JSON.stringify(defaultGlobalData));
+                aboutData = JSON.parse(JSON.stringify(defaultAboutData));
+                projectsData = JSON.parse(JSON.stringify(defaultProjectsData));
+                renderAdminTabs();
+                alert('已恢復預設值！');
+            }
+        }
+
+        window.onload = function() { renderAdminTabs(); };
+    </script>
+</body>
+</html>
