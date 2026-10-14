@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>光影聚落 - 室內裝潢設計作品集</title>
+    <!-- 引入 Supabase 雲端資料庫 SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-color: #f7f5f0;
@@ -810,7 +812,7 @@
                     </div>
                 </div>
                 <div class="cover-right">
-                    <div id="coverPreviewBox" class="cover-preview-box">[ 封面主視覺展示區 ]</div>
+                    <div id="coverPreviewBox" class="cover-preview-box">[ 載入雲端封面中... ]</div>
                 </div>
             </div>
 
@@ -822,7 +824,7 @@
                     </div>
                     <button class="enter-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">&uarr; 回封面</button>
                 </div>
-                <div id="projectListContainer" class="project-list"></div>
+                <div id="projectListContainer" class="project-list">載入雲端專案清單中...</div>
             </div>
         </div>
 
@@ -939,7 +941,11 @@
     </div>
 
     <script>
-        // 預設資料
+        // Supabase 設定
+        const SUPABASE_URL = 'https://dkjgzvztsnbnwaqxukih.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable__xzt2dZi699ORd9dSvvoBA_xGnVxCDt';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const defaultGlobalData = { tag: 'Studio Portfolio', title: '光影聚落', subtitle: '住宅室內設計作品集', footer: 'DESIGN PRESENTATION 2026', imgUrl: '' };
         const defaultAboutData = {
             profileImg: '', cert1Img: '', cert2Img: '',
@@ -972,10 +978,33 @@
             'proj-02': createDefaultProjectTemplate('02. 微光山居行館 (Mountain Villa)', '休閒渡假行館案 - 110坪自然風')
         };
 
-        // 從 localStorage 讀取後台儲存的最新資料
-        let globalData = JSON.parse(localStorage.getItem('portfolio_global_data')) || defaultGlobalData;
-        let aboutData = JSON.parse(localStorage.getItem('portfolio_about_data')) || defaultAboutData;
-        let projectsData = JSON.parse(localStorage.getItem('portfolio_projects_data')) || JSON.parse(JSON.stringify(defaultProjectsData));
+        let globalData = JSON.parse(JSON.stringify(defaultGlobalData));
+        let aboutData = JSON.parse(JSON.stringify(defaultAboutData));
+        let projectsData = JSON.parse(JSON.stringify(defaultProjectsData));
+
+        // 從雲端載入前台資料
+        async function loadFrontendDataFromCloud() {
+            try {
+                const { data, error } = await _supabase.from('portfolio_data').select('*');
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const cloudMap = {};
+                    data.forEach(item => { cloudMap[item.key] = JSON.parse(item.value); });
+                    if (cloudMap['portfolio_global_data']) globalData = cloudMap['portfolio_global_data'];
+                    if (cloudMap['portfolio_about_data']) aboutData = cloudMap['portfolio_about_data'];
+                    if (cloudMap['portfolio_projects_data']) projectsData = cloudMap['portfolio_projects_data'];
+                }
+            } catch (err) {
+                console.error('從雲端載入失敗，改用本地暫存', err);
+                globalData = JSON.parse(localStorage.getItem('portfolio_global_data')) || defaultGlobalData;
+                aboutData = JSON.parse(localStorage.getItem('portfolio_about_data')) || defaultAboutData;
+                projectsData = JSON.parse(localStorage.getItem('portfolio_projects_data')) || defaultProjectsData;
+            }
+
+            applyGlobalData();
+            renderProjectList();
+        }
 
         function applyGlobalData() {
             document.getElementById('coverTagText').innerText = globalData.tag;
@@ -985,6 +1014,7 @@
 
             const previewBox = document.getElementById('coverPreviewBox');
             if (globalData.imgUrl) previewBox.innerHTML = `<img src="${globalData.imgUrl}" alt="封面主視覺">`;
+            else previewBox.innerHTML = '[ 封面主視覺展示區 ]';
 
             const profileBox = document.getElementById('aboutProfileImgBox');
             if (aboutData.profileImg) profileBox.innerHTML = `<img src="${aboutData.profileImg}" alt="個人照片">`;
@@ -1153,8 +1183,7 @@
         function goHome() { showHomeView(); }
 
         window.onload = function() {
-            applyGlobalData();
-            renderProjectList();
+            loadFrontendDataFromCloud();
         };
     </script>
 </body>
