@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>光影聚落 - 管理後台 (CMS)</title>
+    <!-- 引入 Supabase 雲端資料庫 SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-color: #f7f5f0;
@@ -40,17 +42,22 @@
 <body>
     <div class="container">
         <div class="admin-header">
-            <h2>作品集內容與圖片管理後台 (CMS)</h2>
+            <h2>作品集內容與圖片管理後台 (CMS - 雲端同步版)</h2>
             <div class="admin-actions-bar">
                 <button class="btn-primary" onclick="addNewProject()">＋ 新增專案</button>
                 <button class="btn-secondary" onclick="resetToDefaultData()">恢復預設值</button>
-                <button class="btn-primary" onclick="saveData()">儲存並關閉後台</button>
+                <button class="btn-primary" onclick="saveData()">儲存並同步至雲端</button>
             </div>
         </div>
-        <div id="adminContainer"></div>
+        <div id="adminContainer">載入雲端資料中...</div>
     </div>
 
     <script>
+        // Supabase 設定
+        const SUPABASE_URL = 'https://dkjgzvztsnbnwaqxukih.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable__xzt2dZi699ORd9dSvvoBA_xGnVxCDt';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const defaultGlobalData = { tag: 'Studio Portfolio', title: '光影聚落', subtitle: '住宅室內設計作品集', footer: 'DESIGN PRESENTATION 2026', imgUrl: '' };
         const defaultAboutData = {
             profileImg: '', cert1Img: '', cert2Img: '',
@@ -98,9 +105,44 @@
             'proj-02': createDefaultProjectTemplate('02. 微光山居行館 (Mountain Villa)', '休閒渡假行館案 - 110坪自然風')
         };
 
-        let globalData = JSON.parse(localStorage.getItem('portfolio_global_data')) || defaultGlobalData;
-        let aboutData = JSON.parse(localStorage.getItem('portfolio_about_data')) || defaultAboutData;
-        let projectsData = JSON.parse(localStorage.getItem('portfolio_projects_data')) || JSON.parse(JSON.stringify(defaultProjectsData));
+        let globalData = JSON.parse(JSON.stringify(defaultGlobalData));
+        let aboutData = JSON.parse(JSON.stringify(defaultAboutData));
+        let projectsData = JSON.parse(JSON.stringify(defaultProjectsData));
+
+        // 從雲端載入資料
+        async function loadDataFromCloud() {
+            try {
+                const { data, error } = await _supabase.from('portfolio_data').select('*');
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const cloudMap = {};
+                    data.forEach(item => { cloudMap[item.key] = JSON.parse(item.value); });
+                    if (cloudMap['portfolio_global_data']) globalData = cloudMap['portfolio_global_data'];
+                    if (cloudMap['portfolio_about_data']) aboutData = cloudMap['portfolio_about_data'];
+                    if (cloudMap['portfolio_projects_data']) projectsData = cloudMap['portfolio_projects_data'];
+                }
+            } catch (err) {
+                console.error('從雲端載入失敗，改用本地暫存', err);
+                globalData = JSON.parse(localStorage.getItem('portfolio_global_data')) || defaultGlobalData;
+                aboutData = JSON.parse(localStorage.getItem('portfolio_about_data')) || defaultAboutData;
+                projectsData = JSON.parse(localStorage.getItem('portfolio_projects_data')) || defaultProjectsData;
+            }
+            renderAdminTabs();
+        }
+
+        async function saveKeyToCloud(key, valueObj) {
+            const valueStr = JSON.stringify(valueObj);
+            // 同時存入 localStorage 作為備份
+            localStorage.setItem(key, valueStr);
+
+            const { data } = await _supabase.from('portfolio_data').select('*').eq('key', key);
+            if (data && data.length > 0) {
+                await _supabase.from('portfolio_data').update({ value: valueStr }).eq('key', key);
+            } else {
+                await _supabase.from('portfolio_data').insert([{ key: key, value: valueStr }]);
+            }
+        }
 
         function renderAdminTabs() {
             const container = document.getElementById('adminContainer');
@@ -325,7 +367,7 @@
             if (btn) switchTab(projKey, btn);
         }
 
-        function saveData() {
+        async function saveData() {
             globalData.tag = document.getElementById('global_tag').value;
             globalData.title = document.getElementById('global_title').value;
             globalData.subtitle = document.getElementById('global_subtitle').value;
@@ -381,10 +423,12 @@
                 }
             }
 
-            localStorage.setItem('portfolio_global_data', JSON.stringify(globalData));
-            localStorage.setItem('portfolio_about_data', JSON.stringify(aboutData));
-            localStorage.setItem('portfolio_projects_data', JSON.stringify(projectsData));
-            alert('後台資料與圖片已成功儲存！前台頁面重新整理後即可同步顯示。');
+            // 同步寫入雲端
+            await saveKeyToCloud('portfolio_global_data', globalData);
+            await saveKeyToCloud('portfolio_about_data', aboutData);
+            await saveKeyToCloud('portfolio_projects_data', projectsData);
+
+            alert('後台資料與圖片已成功儲存並同步至雲端資料庫！前台重新整理即可看到最新內容。');
         }
 
         function addNewProject() {
@@ -393,29 +437,28 @@
             if (!newName) return;
             projectsData[newKey] = createDefaultProjectTemplate(newName, '住宅空間設計案 - 50坪');
             renderAdminTabs();
-            alert('已新增專案，請記得點擊「儲存並關閉後台」！');
+            alert('已新增專案，請記得點擊「儲存並同步至雲端」！');
         }
 
         function deleteProject(projKey) {
             if (confirm('確定要刪除此專案嗎？')) {
                 delete projectsData[projKey];
                 renderAdminTabs();
-                alert('已刪除！請點擊「儲存並關閉後台」。');
+                alert('已刪除！請點擊「儲存並同步至雲端」。');
             }
         }
 
         function resetToDefaultData() {
             if (confirm('確定要恢復預設值嗎？')) {
-                localStorage.clear();
                 globalData = JSON.parse(JSON.stringify(defaultGlobalData));
                 aboutData = JSON.parse(JSON.stringify(defaultAboutData));
                 projectsData = JSON.parse(JSON.stringify(defaultProjectsData));
                 renderAdminTabs();
-                alert('已恢復預設值！');
+                alert('已載入預設值，記得點擊「儲存並同步至雲端」以寫入雲端！');
             }
         }
 
-        window.onload = function() { renderAdminTabs(); };
+        window.onload = function() { loadDataFromCloud(); };
     </script>
 </body>
 </html>
